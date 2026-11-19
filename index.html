@@ -280,11 +280,13 @@ player.rotation.y=yaw;
 
 }
 
+let distance=7;
+
 let behind=new THREE.Vector3(
-
-Math.sin(yaw)*7,3.5,
-
-Math.cos(yaw)*7
+Math.sin(cameraYaw)*distance,
+2+cameraPitch*4,
+Math.cos(cameraYaw)*distance
+);
 
 );
 
