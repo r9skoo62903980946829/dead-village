@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<title>DEAD VILLAGE</title>
+
+<style>
+
+*{box-sizing:border-box}
+
+body{margin:0;overflow:hidden;background:#080d0b;font-family:Arial;color:white}
+
+#hud{position:absolute;top:15px;left:15px;z-index:5}
+
+#health{width:150px;height:13px;background:#444;border:2px solid white}
+
+#health div{width:100%;height:100%;background:#bd2525}
+
+#title{font-size:22px;font-weight:bold;margin-bottom:8px;letter-spacing:2px}
+
+#hint{font-size:12px;color:#bbb;margin-top:7px}
+
+#stick{position:absolute;bottom:30px;left:25px;width:115px;height:115px;border-radius:50%;background:#ffffff30;border:2px solid #ffffff80;z-index:10;touch-action:none}
+
+#knob{position:absolute;left:32px;top:32px;width:47px;height:47px;border-radius:50%;background:#ddd9}
+
+#attack{position:absolute;bottom:45px;right:30px;width:75px;height:75px;border-radius:50%;background:#8c1919dd;border:2px solid white;color:white;font-size:15px;z-index:10}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="hud">
+
+<div id="title">DEAD VILLAGE</div>
+
+<div id="health"><div></div></div>
+
+<div id="hint">SURVIVE. EXPLORE. ESCAPE.</div>
+
+</div>
+
+<div id="stick"><div id="knob"></div></div>
+
+<button id="attack">TIRER</button>
+
+<script type="module">
+
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const scene=new THREE.Scene();
+
+scene.background=new THREE.Color(0x111a19);
+
+scene.fog=new THREE.FogExp2(0x111a19,0.035);
+
+const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,200);
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+
+renderer.setSize(innerWidth,innerHeight);
+
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0x9caeb0,0x25251b,2));
+
+const moon=new THREE.DirectionalLight(0xc2d0d0,1.5);
+
+moon.position.set(-10,20,5);
+
+scene.add(moon);
+
+const ground=new THREE.Mesh(
+
+new THREE.PlaneGeometry(150,150),
+
+new THREE.MeshStandardMaterial({color:0x30382b})
+
+);
+
+ground.rotation.x=-Math.PI/2;
+
+scene.add(ground);
+
+function box(x,y,z,w,h,d,color){
+
+const m=new THREE.Mesh(
+
+new THREE.BoxGeometry(w,h,d),
+
+new THREE.MeshStandardMaterial({color})
+
+);
+
+m.position.set(x,y,z);
+
+scene.add(m);
+
+return m;
+
+}
+
+// Maisons abandonnées
+
+for(let i=0;i<18;i++){
+
+let x=(Math.random()-.5)*65;
+
+let z=(Math.random()-.5)*65;
+
+if(Math.abs(x)<9&&Math.abs(z)<12)continue;
+
+box(x,2,z,7,4,7,0x51483a);
+
+box(x,4.5,z,8,1,8,0x292725);
+
+box(x,1,z-3.56,1.5,2,0.2,0x171512);
+
+}
+
+// Arbres
+
+for(let i=0;i<60;i++){
+
+let x=(Math.random()-.5)*90;
+
+let z=(Math.random()-.5)*90;
+
+box(x,2,z,.7,4,.7,0x33291f);
+
+let leaves=box(x,5,z,3,4,3,0x17251c);
+
+}
+
+// Personnage
+
+const player=new THREE.Group();
+
+scene.add(player);
+
+const body=box(0,1,0,.8,1.3,.5,0x343c39);
+
+const head=new THREE.Mesh(
+
+new THREE.SphereGeometry(.32,16,16),
+
+new THREE.MeshStandardMaterial({color:0xb49a7e})
+
+);
+
+head.position.y=1.9;
+
+player.add(head);
+
+const leg1=box(-.23,.25,0,.28,.7,.3,0x20252a);
+
+const leg2=box(.23,.25,0,.28,.7,.3,0x20252a);
+
+player.add(leg1,leg2);
+
+player.position.set(0,0,5);
+
+let moveX=0,moveY=0,yaw=0;
+
+const stick=document.getElementById('stick');
+
+const knob=document.getElementById('knob');
+
+stick.addEventListener('pointermove',e=>{
+
+if(e.buttons===0&&!e.pointerType.includes('touch'))return;
+
+const r=stick.getBoundingClientRect();
+
+let dx=e.clientX-(r.left+r.width/2);
+
+let dy=e.clientY-(r.top+r.height/2);
+
+let len=Math.hypot(dx,dy);
+
+if(len>35){dx*=35/len;dy*=35/len}
+
+knob.style.transform=`translate(${dx}px,${dy}px)`;
+
+moveX=dx/35;
+
+moveY=dy/35;
+
+});
+
+stick.addEventListener('pointerdown',e=>stick.setPointerCapture(e.pointerId));
+
+function stop(){
+
+moveX=0;moveY=0;knob.style.transform='';
+
+}
+
+stick.addEventListener('pointerup',stop);
+
+stick.addEventListener('pointercancel',stop);
+
+camera.position.set(0,4,9);
+
+camera.lookAt(player.position);
+
+function animate(){
+
+requestAnimationFrame(animate);
+
+let forward=new THREE.Vector3(
+
+Math.sin(yaw),0,Math.cos(yaw)
+
+);
+
+let right=new THREE.Vector3(
+
+Math.cos(yaw),0,-Math.sin(yaw)
+
+);
+
+let movement=forward.multiplyScalar(moveY*.09)
+
+.add(right.multiplyScalar(moveX*.09));
+
+player.position.add(movement);
+
+if(movement.length()>.001){
+
+yaw=Math.atan2(movement.x,movement.z);
+
+player.rotation.y=yaw;
+
+}
+
+let behind=new THREE.Vector3(
+
+Math.sin(yaw)*7,3.5,
+
+Math.cos(yaw)*7
+
+);
+
+camera.position.lerp(
+
+player.position.clone().add(behind),.08
+
+);
+
+camera.lookAt(player.position.x,1.3,player.position.z);
+
+renderer.render(scene,camera);
+
+}
+
+animate();
+
+document.getElementById('attack').onclick=()=>{
+
+console.log('TIR !');
+
+};
+
+window.addEventListener('resize',()=>{
+
+camera.aspect=innerWidth/innerHeight;
+
+camera.updateProjectionMatrix();
+
+renderer.setSize(innerWidth,innerHeight);
+
+});
+
+</script>
+
+</body>
+
+</html>
