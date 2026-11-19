@@ -13,7 +13,15 @@
 <title>DEAD VILLAGE</title>
 
 <style>
-
+#cameraTouch{
+ position:absolute;
+ top:0;
+ right:0;
+ width:65%;
+ height:100%;
+ z-index:4;
+ touch-action:none;
+}
 *{box-sizing:border-box}
 
 body{margin:0;overflow:hidden;background:#080d0b;font-family:Arial;color:white}
@@ -321,7 +329,7 @@ renderer.setSize(innerWidth,innerHeight);
 });
 
 </script>
-
+<div id="cameraTouch"></div>
 </body>
 
 </html>
