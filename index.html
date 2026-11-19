@@ -177,7 +177,37 @@ let cameraYaw=0;
 let cameraPitch=0.25;
 let dragging=false;
 let lastX=0,lastY=0;
+renderer.domElement.style.touchAction='none';
 
+renderer.domElement.addEventListener('pointerdown',e=>{
+ dragging=true;
+ lastX=e.clientX;
+ lastY=e.clientY;
+ renderer.domElement.setPointerCapture(e.pointerId);
+});
+
+renderer.domElement.addEventListener('pointermove',e=>{
+ if(!dragging)return;
+
+ const dx=e.clientX-lastX;
+ const dy=e.clientY-lastY;
+
+ cameraYaw-=dx*0.006;
+ cameraPitch-=dy*0.004;
+
+ cameraPitch=Math.max(-0.25,Math.min(0.9,cameraPitch));
+
+ lastX=e.clientX;
+ lastY=e.clientY;
+});
+
+renderer.domElement.addEventListener('pointerup',()=>{
+ dragging=false;
+});
+
+renderer.domElement.addEventListener('pointercancel',()=>{
+ dragging=false;
+});
 const stick=document.getElementById('stick');
 
 const knob=document.getElementById('knob');
