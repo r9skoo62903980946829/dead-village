@@ -173,6 +173,10 @@ player.add(leg1,leg2);
 player.position.set(0,0,5);
 
 let moveX=0,moveY=0,yaw=0;
+let cameraYaw=0;
+let cameraPitch=0.25;
+let dragging=false;
+let lastX=0,lastY=0;
 
 const stick=document.getElementById('stick');
 
